@@ -1,10 +1,11 @@
 ---
-- name: Install luigi via pip
+- name: Install luigi (and sciluigi) via pip
   pip:
     name={{ item }}
   with_items:
     - luigi
     - tornado
+    - sciluigi
   environment:
     PYENV_ROOT: "{{ home }}/.pyenv"
     PYENV_SHELL: "bash"
