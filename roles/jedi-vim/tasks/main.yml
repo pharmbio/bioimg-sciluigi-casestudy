@@ -3,13 +3,14 @@
   git:
     repo=https://github.com/davidhalter/jedi-vim.git
     dest={{ home }}/.vim/bundle/jedi-vim
-    version=HEAD
+    version=0.8.0
     recursive=no
+    force=yes
 - name: Check out jedi manually into jedi-vim/jedi
   git:
     repo=https://github.com/davidhalter/jedi.git
     dest={{ home }}/.vim/bundle/jedi-vim/jedi
-    version=HEAD
+    version=v0.9.0
 - name: Create folder ~/.vim/bundle-last
   file:
     dest={{ home }}/.vim/bundle-last
@@ -18,4 +19,5 @@
   git:
     repo=https://github.com/lambdalisue/vim-pyenv.git
     dest={{ home }}/.vim/bundle-last/vim-pyenv
+    version=v1.4
 
