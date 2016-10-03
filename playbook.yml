@@ -2,29 +2,34 @@
 - hosts: all
   sudo: true
   vars:
-      home: /home/vagrant
+      home: /home/ubuntu
       document_root: /vagrant
+  gather_facts: no
   pre_tasks:
-      - name: Symlink sh to bash rather than dash
-        file: src=/bin/bash dest=/bin/sh state=link force=true
-      - name: Update apt cache and optionally upgrade
-        apt:
-          update_cache=yes
-          cache_valid_time=7200
-          #upgrade=yes # Uncomment this to force full upgrade!
-      - name: Install stuff from Aptitude
-        apt: name={{ item }} state=installed
-        with_items:
-         - git
-         - tig
-         - vim
-         - gdb
-         - cgdb
-         - bash-completion # Not included in the docker image
-         - make
-         - tree
-         - htop
-         - tmux
+    - name: Install Python 2
+      raw: sudo apt-get -y install python-simplejson
+    - name: Symlink sh to bash rather than dash
+      file: src=/bin/bash dest=/bin/sh state=link force=true
+    - name: Update apt cache and optionally upgrade
+      apt:
+        update_cache=yes
+        cache_valid_time=7200
+        #upgrade=yes # Uncomment this to force full upgrade!
+    - name: Install stuff from Aptitude
+      apt: name={{ item }} state=installed
+      with_items:
+       - python-minimal
+       - build-essential
+       - git
+       - tig
+       - vim
+       - gdb
+       - cgdb
+       - bash-completion # Not included in the docker image
+       - make
+       - tree
+       - htop
+       - tmux
   roles:
       - { role: dotfiles, sudo: false }
       - { role: python, sudo: false }
