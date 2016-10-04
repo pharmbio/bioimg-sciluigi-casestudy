@@ -1,0 +1,13 @@
+---
+- name: Install some required packages from apt
+  apt:
+      name={{ item }} state=installed
+  with_items:
+      - mysql-client
+      - mysql-server
+  sudo: true
+- name: Create project folder
+  file:
+      path={{ home }}/proj/sciluigi_usecase
+      state=directory
+      mode=0755

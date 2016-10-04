@@ -35,5 +35,4 @@
       - { role: python, sudo: false }
       - { role: jedi-vim, sudo: false }
       - { role: luigi, sudo: false }
-      - { role: mmproj, sudo: false }
-      #- { role: youcompleteme, sudo: false } # Comment out this to save time!!
+      - { role: sciluigi_usecase, sudo: false }
