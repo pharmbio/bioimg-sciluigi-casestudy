@@ -8,6 +8,11 @@
   sudo: true
 - name: Create project folder
   file:
-      path={{ home }}/proj/sciluigi_usecase
+      path={{ home }}/proj
       state=directory
       mode=0755
+- name: Create symlink to sciluigi_usecase project folder
+  file:
+      src=/vagrant/roles/sciluigi_usecase/files/sciluigi_usecase_proj
+      dest=/home/ubuntu/proj/sciluigi_usecase
+      state=link
