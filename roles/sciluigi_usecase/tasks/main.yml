@@ -3,11 +3,18 @@
   apt:
       name={{ item }} state=installed
   with_items:
-      - mysql-client
-      - mysql-server
-      - mysql-common
-      - libmysqlclient-dev
-      - python-mysqldb
+    - mysql-client
+    - mysql-server
+    - mysql-common
+    - libmysqlclient-dev
+    - python-mysqldb
+    - xvfb
+    - r-base
+  sudo: true
+- name: Install a few R packages
+  command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "if (! ('{{item}}' %in% installed.packages()[,'Package'])) install.packages(pkgs='{{item}}', repos=c('http://www.freestatistics.org/cran/'))"
+  with_items:
+    - argparse
   sudo: true
 - name: Start the MySQL service
   sudo: yes
