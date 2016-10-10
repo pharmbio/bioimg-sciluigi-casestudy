@@ -393,7 +393,7 @@ class TrainSVMModel(sl.SlurmTask):
         if self.parallel_train:
             self.ex(['/usr/bin/time', '-f%e', '-o',
                     self.out_traintime().path,
-                    'pisvm-train',
+                    'bin/pisvm-train',
                     '-o', str(o),
                     '-q', str(q),
                     '-s', self.svm_type,
@@ -408,7 +408,7 @@ class TrainSVMModel(sl.SlurmTask):
         else:
             self.ex(['/usr/bin/time', '-f%e', '-o',
                 self.out_traintime().path,
-                'svm-train',
+                'bin/svm-train',
                 '-s', self.svm_type,
                 '-t', self.svm_kernel_type,
                 '-g', self.svm_gamma,
@@ -451,7 +451,7 @@ class TrainLinearModel(sl.SlurmTask):
         #self.ex(['distlin-train',
         self.ex(['/usr/bin/time', '-f%e', '-o',
             self.out_traintime().path,
-            'lin-train',
+            'bin/lin-train',
             '-s', self.lin_type,
             '-c', self.lin_cost,
             '-q', # quiet mode
@@ -476,7 +476,7 @@ class PredictSVMModel(sl.Task):
     # WHAT THE TASK DOES
     def run(self):
         # Run prediction
-        self.ex(['svm-predict',
+        self.ex(['bin/svm-predict',
                 self.in_sparse_testdata().path,
                 self.in_svmmodel().path,
                 self.out_prediction().path])
@@ -497,7 +497,7 @@ class PredictLinearModel(sl.Task):
 
     # WHAT THE TASK DOES
     def run(self):
-        self.ex(['lin-predict',
+        self.ex(['bin/lin-predict',
             self.in_sparse_testdata().path,
             self.in_model().path,
             self.out_prediction().path])
@@ -1587,7 +1587,7 @@ class BCutPreprocess(sl.Task):
         return sl.TargetInfo(self, self.in_signatures().path + '.bcut_preproc.log')
 
     def run(self):
-        self.ex(['runbcut',
+        self.ex(['bin/runbcut',
                 self.in_signatures().path,
                 self.out_bcut_preprocessed().path])
 
@@ -1855,7 +1855,6 @@ class PlotCSV(sl.Task):
         tsf.close()
         # Execute the R script
         self.ex_local(['xvfb-run',
-                       '-d',
                        'Rscript',
                        tempscriptpath,
                        '-i',
