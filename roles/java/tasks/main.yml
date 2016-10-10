@@ -1,0 +1,6 @@
+---
+- name: Install Java
+  apt: name={{ item }} state=installed
+  with_items:
+    - default-jre
+  sudo: true
