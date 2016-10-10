@@ -1,0 +1,6 @@
+---
+- name: Install the XFCE Desktop Environment
+  apt: name={{ item }} state=installed
+  with_items:
+    - xfce4
+  sudo: true

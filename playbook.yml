@@ -31,6 +31,7 @@
        - htop
        - tmux
   roles:
+      - { role: desktop, sudo: false }
       - { role: dotfiles, sudo: false }
       - { role: python, sudo: false }
       - { role: jedi-vim, sudo: false }
