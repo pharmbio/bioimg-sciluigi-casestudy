@@ -16,14 +16,14 @@ class MMWorkflow(sl.WorkflowTask):
 
     # WORKFLOW PARAMETERS
     dataset_name = luigi.Parameter(default='mm_test_small')
-    run_id = luigi.Parameter()
+    run_id = luigi.Parameter(default='test_run_001')
     replicate_id = luigi.Parameter(default=None)
-    replicate_ids = luigi.Parameter(default=None)
-    sampling_method = luigi.Parameter()
-    train_method = luigi.Parameter() # TRAINMETHOD_LIBLINEAR or TRAINMETHOD_SVMRBF
-    train_size = luigi.Parameter(default=None)
+    replicate_ids = luigi.Parameter(default='r1,r2,r3')
+    sampling_method = luigi.Parameter(default='random')
+    train_method = luigi.Parameter(default=TRAINMETHOD_LIBLINEAR) # TRAINMETHOD_LIBLINEAR or TRAINMETHOD_SVMRBF
+    train_size = luigi.Parameter(default=5000)
     train_sizes = luigi.Parameter(default=None)
-    test_size = luigi.Parameter()
+    test_size = luigi.Parameter(default=1000)
 
     lin_type = luigi.Parameter(default='12')
     lin_cost = luigi.Parameter(default='CHANGETHIS')
@@ -33,10 +33,9 @@ class MMWorkflow(sl.WorkflowTask):
     svm_type = luigi.Parameter(default='3')
     svm_kernel_type = luigi.Parameter('2')
 
-    slurm_project = luigi.Parameter()
     parallel_lin_train = luigi.BooleanParameter()
     parallel_svm_train = luigi.BooleanParameter()
-    runmode = luigi.Parameter()
+    runmode = luigi.Parameter(default='local')
     #folds_count = luigi.Parameter()
 
     def workflow(self):
