@@ -15,7 +15,7 @@ class MMWorkflow(sl.WorkflowTask):
     '''
 
     # WORKFLOW PARAMETERS
-    dataset_name = luigi.Parameter(default='mm_test_small')
+    dataset_name = luigi.Parameter(default='testrun_dataset')
     run_id = luigi.Parameter(default='test_run_001')
     replicate_id = luigi.Parameter(default=None)
     replicate_ids = luigi.Parameter(default='r1,r2,r3')
@@ -36,6 +36,8 @@ class MMWorkflow(sl.WorkflowTask):
     parallel_lin_train = luigi.BooleanParameter()
     parallel_svm_train = luigi.BooleanParameter()
     runmode = luigi.Parameter(default='local')
+    
+    slurm_project = 'N/A'
     #folds_count = luigi.Parameter()
 
     def workflow(self):

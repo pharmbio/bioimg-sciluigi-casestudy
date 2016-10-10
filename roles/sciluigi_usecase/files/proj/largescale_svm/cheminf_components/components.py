@@ -136,7 +136,7 @@ class GenerateSignaturesFilterSubstances(sl.SlurmTask):
 
     # WHAT THE TASK DOES
     def run(self):
-        self.ex(['runjar', 'GenerateSignatures',
+        self.ex(['java', '-jar', 'bin/GenerateSignatures.jar',
                 '-inputfile', self.in_smiles().path,
                 '-threads', self.slurminfo.threads,
                 '-minheight', str(self.min_height),
@@ -240,7 +240,7 @@ class SampleTrainAndTest(sl.SlurmTask):
                       'signature_count' : 'SampleTrainingAndTestSizedBased' }
         jar_file = jar_files[self.sampling_method]
 
-        cmd = ['runjar', jar_file,
+        cmd = ['java', '-jar', 'bin/' + jar_file + '.jar',
                      '-inputfile', self.in_signatures().path,
                      '-testfile', test_temp_path,
                      '-trainingfile', train_temp_path,
@@ -281,7 +281,7 @@ class CreateSparseTrainDataset(sl.SlurmTask):
 
     # WHAT THE TASK DOES
     def run(self):
-        self.ex(['runjar', 'CreateSparseDataset',
+        self.ex(['java', '-jar', 'bin/CreateSparseDataset.jar',
                 '-inputfile', self.in_traindata().path,
                 '-datasetfile', self.out_sparse_traindata().path,
                 '-signaturesoutfile', self.out_signatures().path,
@@ -311,7 +311,7 @@ class CreateSparseTestDataset(sl.Task):
 
     # WHAT THE TASK DOES
     def run(self):
-        self.ex(['runjar', 'CreateSparseDataset',
+        self.ex(['java', '-jar', 'bin/CreateSparseDataset.jar',
                 '-inputfile', self.in_testdata().path,
                 '-signaturesinfile', self.in_signatures().path,
                 '-datasetfile', self.out_sparse_testdata().path,
@@ -981,7 +981,7 @@ class CreateElasticNetModel(sl.Task):
         ))
 
     def run(self):
-        self.ex(['runjar', 'CreateElasticNetModel',
+        self.ex(['java', '-jar', 'bin/CreateElasticNetModel.jar',
                 '-inputfile', self.in_traindata().path,
                 '-l1ratio', str(self.get_value('l1_value')),
                 '-lambda', str(self.get_value('lambda_value')),
@@ -1010,7 +1010,7 @@ class PredictElasticNetModel(sl.Task):
         return sl.TargetInfo(self, self.in_elasticnet_model().path + '.pred')
 
     def run(self):
-        self.ex(['runjar', 'PredictElasticNetModel',
+        self.ex(['java', '-jar', 'bin/PredictElasticNetModel.jar',
                 '-modelfile', self.in_elasticnet_model().path,
                 '-testset', self.in_testdata().path,
                 '-outputfile', self.out_prediction().path,
@@ -1286,7 +1286,7 @@ class BuildP2Sites(sl.Task):
 
         # Process Endpoint
         self.ex_local(['cd', temp_folder, ';',
-                'runjar', 'bnd-2.3.0',
+                'java', '-jar', 'bin/bnd-2.3.0.jar',
                 'endpoint_bundle.bnd'])
 
 
@@ -1313,7 +1313,7 @@ class BuildP2Sites(sl.Task):
 
         # Process
         self.ex_local(['cd', temp_folder, ';',
-                 'runjar', 'bnd-2.3.0',
+                 'java', '-jar', 'bin/bnd-2.3.0.jar',
                  'plugin_bundle.bnd'])
 
         # Create feature file
@@ -1512,7 +1512,7 @@ class GenerateFingerprint(sl.Task):
         return sl.TargetInfo(self, self.in_dataset().path + '.' + self.fingerprint_type + '.csr')
 
     def run(self):
-        self.ex(['runjar', 'FingerprintsGenerator',
+        self.ex(['java', '-jar', 'bin/FingerprintsGenerator.jar',
                 '-fp', self.fingerprint_type,
                 '-inputfile', self.in_dataset().path,
                 '-parser', '1',
