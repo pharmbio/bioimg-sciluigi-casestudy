@@ -3,22 +3,25 @@
 
 VAGRANTFILE_API_VERSION = "2"
 
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |conf|
 
   # --------------------------------------------------------------------
   # Definitions for the VirtualBox machine
   # --------------------------------------------------------------------
-  config.vm.define "virtualbox", autostart: true do |vbox|
-    vbox.vm.provider "virtualbox" do |v|
-      v.memory = 2048
-      v.cpus = 2
+  conf.vm.define "bioimg", autostart: true do |bimg|
+    conf.ssh.username = "ubuntu"
+    conf.ssh.password = "ubuntu"
+    bimg.vm.provider "virtualbox" do |vbox|
+      vbox.memory = 2048
+      vbox.cpus = 2
+      vbox.gui = true
     end
-    vbox.vm.box = "ubuntu/xenial64"
-    vbox.vm.network "forwarded_port", guest: 80, host: 8080
-    vbox.vm.provision :ansible do |ansible|
+    bimg.vm.box = "ubuntu/xenial64"
+    bimg.vm.network "forwarded_port", guest: 80, host: 8080
+    bimg.vm.provision :ansible do |ansible|
       ansible.playbook = "playbook.yml"
     end
     # Tell the user what to do next
-	vbox.vm.provision "shell", inline: "echo 'Finished! Now try logging in with: vagrant ssh virtualbox'"
+	bimg.vm.provision "shell", inline: "echo 'Finished! Now try logging in with: vagrant ssh virtualbox'"
   end
 end
