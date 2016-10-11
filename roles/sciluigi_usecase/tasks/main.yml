@@ -37,8 +37,14 @@
     - ::1
     - localhost
     - '%'
-- name: Create symlink to sciluigi_usecase project folder
-  file:
-      src=/vagrant/roles/sciluigi_usecase/files/proj
-      dest=/home/ubuntu/proj
-      state=link
+- name: Copy sciluigi_usecase project folder to host
+  copy:
+      src=files/proj
+      dest=/home/ubuntu
+      mode=0644
+- name: Download executable files from FigShare, for use in the workflow
+  get_url: url=https://ndownloader.figshare.com/files/6330402 dest=/home/ubuntu/proj/largescale_svm/binaries.tar.gz
+- name: Create bin folder
+  file: name=/home/ubuntu/proj/largescale_svm/bin state=directory
+- name: Untar binariesarchive
+  unarchive: src=/home/ubuntu/proj/largescale_svm/binaries.tar.gz dest=/home/ubuntu/proj/largescale_svm/bin copy=no
