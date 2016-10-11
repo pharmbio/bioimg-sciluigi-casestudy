@@ -1,4 +1,4 @@
-from components import *
+from cheminf_components import *
 import logging
 import luigi
 import sciluigi as sl
@@ -16,19 +16,19 @@ class CrossValidate(sl.WorkflowTask):
     '''
 
     # PARAMETERS
-    dataset_name = luigi.Parameter()
-    run_id = luigi.Parameter()
+    dataset_name = luigi.Parameter(default='testrun_dataset')
+    run_id = luigi.Parameter('test_run_001')
     replicate_id = luigi.Parameter(default=None)
-    replicate_ids = luigi.Parameter(default=None)
-    folds_count = luigi.IntParameter()
-    min_height = luigi.Parameter()
-    max_height = luigi.Parameter()
-    test_size = luigi.Parameter()
-    train_sizes = luigi.Parameter()
+    replicate_ids = luigi.Parameter(default='r1,r2,r3')
+    folds_count = luigi.IntParameter(default=10)
+    min_height = luigi.Parameter(default=1)
+    max_height = luigi.Parameter(default=3)
+    test_size = luigi.Parameter(1000)
+    train_sizes = luigi.Parameter(default='5000')
     lin_type = luigi.Parameter(default='12') # 12, See: https://www.csie.ntu.edu.tw/~cjlin/liblinear/FAQ.html
-    randomdatasize_mb = luigi.IntParameter()
-    slurm_project = luigi.Parameter(default='b2013262')
-    runmode = luigi.Parameter()
+    randomdatasize_mb = luigi.IntParameter(default=10)
+    runmode = 'local'
+    slurm_project = 'N/A'
 
     def workflow(self):
         if self.runmode == 'local':
@@ -309,4 +309,4 @@ class MainWorkflowRunner(sl.Task):
 # ================================================================================
 
 if __name__ == '__main__':
-    sl.run_local()
+    sl.run_local(main_task_cls=CrossValidate)
