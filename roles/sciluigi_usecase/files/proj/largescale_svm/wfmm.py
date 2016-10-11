@@ -37,7 +37,8 @@ class MMWorkflow(sl.WorkflowTask):
     parallel_svm_train = luigi.BooleanParameter()
     runmode = luigi.Parameter(default='local')
     
-    slurm_project = 'N/A'
+    slurm_project = luigi.Parameter(default='N/A')
+
     #folds_count = luigi.Parameter()
 
     def workflow(self):

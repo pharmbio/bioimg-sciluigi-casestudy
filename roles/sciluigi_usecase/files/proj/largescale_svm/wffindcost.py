@@ -291,7 +291,7 @@ class MainWorkflowRunner(sl.Task):
         with self.in_lowestrmsd().open() as infile:
             records = sl.recordfile_to_dict(infile)
             lowest_cost = records['lowest_cost']
-        self.ex('python wfmm.py MMWorkflow' +
+        self.ex('python wfmm.py' +
                 ' --dataset-name=%s' % self.dataset_name +
                 ' --run-id=%s' % self.run_id +
                 ' --replicate-id=%s' % self.replicate_id +
