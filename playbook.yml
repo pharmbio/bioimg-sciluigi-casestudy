@@ -19,6 +19,7 @@
       apt: name={{ item }} state=installed
       with_items:
        - python-minimal
+       - python-pexpect
        - build-essential
        - git
        - tig
@@ -30,6 +31,11 @@
        - tree
        - htop
        - tmux
+    - name: Set a password that we know
+      expect:
+        command: passwd ubuntu
+        responses:
+          (?i)password: "changethis..."
   roles:
       - { role: desktop, sudo: false }
       - { role: dotfiles, sudo: false }

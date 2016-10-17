@@ -12,7 +12,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |conf|
     bimg.vm.provider "virtualbox" do |vbox|
       vbox.memory = 2048
       vbox.cpus = 2
-      #vbox.gui = true
+      vbox.gui = true
     end
     bimg.vm.box = "ubuntu/xenial64"
     bimg.vm.network "forwarded_port", guest: 80, host: 8080
