@@ -46,6 +46,7 @@
   with_items:
     - nose
     - tdaemon
+    - jupyter
   environment:
     PYENV_ROOT: "{{ home }}/.pyenv"
     PYENV_SHELL: "bash"

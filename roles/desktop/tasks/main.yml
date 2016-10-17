@@ -30,4 +30,5 @@
     - make
     - xfce4-terminal
     - virtualbox-guest-utils
+    - geany
   sudo: true
