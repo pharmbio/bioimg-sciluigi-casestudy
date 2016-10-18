@@ -1,9 +1,14 @@
 ---
+- name: Install luigi via pip
+  pip: name=luigi version=2.1.0 # Has to be 2.1.0 to not give warnings about non-string parameters
+  environment:
+    PYENV_ROOT: "{{ home }}/.pyenv"
+    PYENV_SHELL: "bash"
+    PATH: "{{ home }}/.pyenv/shims:{{ home }}/.pyenv/bin:$PATH:/usr/bin:/bin:$PATH"
 - name: Install luigi (and sciluigi) via pip
   pip:
     name={{ item }}
   with_items:
-    - luigi
     - tornado
     - sciluigi
   environment:
