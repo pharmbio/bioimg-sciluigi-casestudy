@@ -28,7 +28,7 @@
     - zip
     - firefox
     - make
-    - xfce4-terminal
+    - gnome-terminal
     - virtualbox-guest-utils
     - geany
   sudo: true
