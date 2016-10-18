@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Exec=/home/ubuntu/proj/largescale_svm/openjupyter.sh
+Path=/home/ubuntu/proj/largescale_svm/
+Name=Open Jupyter Notebook
+GenericName=Open Jupyter Notebook
+Comment=Open Case Study example in a Jupyter Notebook
+Encoding=UTF-8
+Terminal=true
+Type=Application
+Categories=Application;
+Icon=audio-player

@@ -42,17 +42,17 @@
       src=files/proj
       dest=/home/ubuntu
       mode=0644
-- name: Make runjupyter script executable
+- name: Make openjupyter script executable
   file:
-      path=/home/ubuntu/proj/largescale_svm/runjupyter.sh
+      path=/home/ubuntu/proj/largescale_svm/openjupyter.sh
       mode=744
 - name: Make runall script executable
   file:
       path=/home/ubuntu/proj/largescale_svm/runall.sh
       mode=744
-- name: Place "Start Jupyter Notebook" icon on desktop
+- name: Place "Open Jupyter Notebook" icon on desktop
   copy:
-      src=files/run_jupyter_notebook.desktop
+      src=files/open_jupyter_notebook.desktop
       dest=/home/ubuntu/Desktop
       mode=744
 - name: Download executable files from FigShare, for use in the workflow
