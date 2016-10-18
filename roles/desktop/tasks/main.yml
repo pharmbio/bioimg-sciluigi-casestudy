@@ -1,5 +1,5 @@
 ---
-- name: Install the Xubuntu Desktop Environment
+- name: Install selected parts from the Xubuntu Desktop Environment
   apt: name={{ item }} state=installed
   with_items:
     - xubuntu-core
