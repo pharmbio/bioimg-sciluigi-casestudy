@@ -42,6 +42,19 @@
       src=files/proj
       dest=/home/ubuntu
       mode=0644
+- name: Make runjupyter script executable
+  file:
+      path=/home/ubuntu/proj/largescale_svm/runjupyter.sh
+      mode=744
+- name: Make runall script executable
+  file:
+      path=/home/ubuntu/proj/largescale_svm/runall.sh
+      mode=744
+- name: Place "Start Jupyter Notebook" icon on desktop
+  copy:
+      src=files/run_jupyter_notebook.desktop
+      dest=/home/ubuntu/Desktop
+      mode=744
 - name: Download executable files from FigShare, for use in the workflow
   get_url: url=https://ndownloader.figshare.com/files/6330402 dest=/home/ubuntu/proj/largescale_svm/binaries.tar.gz
 - name: Create bin folder

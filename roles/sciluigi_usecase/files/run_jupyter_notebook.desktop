@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Exec=/home/ubuntu/proj/largescale_svm/runjupyter.sh
+Path=/home/ubuntu/proj/largescale_svm/
+Name=Run Jupyter Notebook
+GenericName=Run Jupyter Notebook
+Comment=Start Case Study example in a Jupyter Notebook
+Encoding=UTF-8
+Terminal=true
+Type=Application
+Categories=Application;
+Icon=audio-player
