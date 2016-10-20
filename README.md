@@ -10,6 +10,11 @@ in [this folder](https://github.com/pharmbio/bioimg-sciluigi-casestudy/tree/mast
 For a view-only version of the Jupyter Notebook with the full case study workflow,
 [see here](https://github.com/pharmbio/bioimg-sciluigi-casestudy/blob/master/roles/sciluigi_usecase/files/proj/largescale_svm/wffindcost.ipynb).
 
+Screenshot
+----------
+
+![Screenshot](http://i.imgur.com/SbxZxiP.png)
+
 Usage
 -----
 
