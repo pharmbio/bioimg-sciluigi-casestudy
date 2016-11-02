@@ -29,6 +29,7 @@
     - firefox
     - make
     - gnome-terminal
+    - gnome-system-monitor
     - virtualbox-guest-utils
     - geany
   sudo: true
