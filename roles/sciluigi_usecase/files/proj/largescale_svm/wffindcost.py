@@ -4,15 +4,11 @@ import luigi
 import sciluigi as sl
 import time
 
-# ====================================================================================================
-#  New components for Cross-validation - May 8, 2015
-# ====================================================================================================
-
 log = logging.getLogger('sciluigi-interface')
 
 class CrossValidate(sl.WorkflowTask):
     '''
-    For now, a sketch on how to implement Cross-Validation as a sub-workflow components
+    Find the optimal SVM cost values via a grid-search, with cross-validation
     '''
 
     # PARAMETERS
