@@ -20,7 +20,7 @@ class CrossValidate(sl.WorkflowTask):
     min_height = luigi.Parameter(default=1)
     max_height = luigi.Parameter(default=3)
     test_size = luigi.Parameter(1000)
-    train_sizes = luigi.Parameter(default='5000')
+    train_sizes = luigi.Parameter(default='50,100,500,1000,5000')
     lin_type = luigi.Parameter(default='12') # 12, See: https://www.csie.ntu.edu.tw/~cjlin/liblinear/FAQ.html
     randomdatasize_mb = luigi.IntParameter(default=10)
     runmode = 'local'
