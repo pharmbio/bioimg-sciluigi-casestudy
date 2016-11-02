@@ -305,4 +305,4 @@ class MainWorkflowRunner(sl.Task):
 # ================================================================================
 
 if __name__ == '__main__':
-    sl.run_local(main_task_cls=CrossValidate)
+    sl.run(cmdline_args=['--scheduler-host=localhost', '--workers=2'], main_task_cls=CrossValidate)
