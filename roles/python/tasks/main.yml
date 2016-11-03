@@ -10,6 +10,8 @@
     - libbz2-dev
     - libsqlite3-dev
     - libssl-dev
+    - python-pip
+    - python-matplotlib
 - name: Install pyenv
   git:
     repo=https://github.com/yyuu/pyenv.git
@@ -47,6 +49,7 @@
     - nose
     - tdaemon
     - jupyter
+    - matplotlib
   environment:
     PYENV_ROOT: "{{ home }}/.pyenv"
     PYENV_SHELL: "bash"

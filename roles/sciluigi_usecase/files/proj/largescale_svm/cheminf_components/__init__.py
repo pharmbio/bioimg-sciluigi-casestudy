@@ -15,6 +15,7 @@ from cheminf_components.components import CreateReplicateCopy
 from cheminf_components.components import ExistingFile
 from cheminf_components.components import ExistingSmiles
 from cheminf_components.components import GenerateSignaturesFilterSubstances
+from cheminf_components.components import MergedDataReport
 from cheminf_components.components import PredictLinearModel
 from cheminf_components.components import PredictSVMModel
 from cheminf_components.components import SampleTrainAndTest

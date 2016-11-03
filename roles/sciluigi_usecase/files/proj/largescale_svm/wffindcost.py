@@ -1,6 +1,9 @@
 from cheminf_components import *
+from matplotlib.pyplot import *
+import csv
 import logging
 import luigi
+import os
 import sciluigi as sl
 import time
 
@@ -236,10 +239,10 @@ class CrossValidate(sl.WorkflowTask):
                             lin_cost=cost)
                     average_rmsd.in_assessments = [tasks[replicate_id][fold_idx][cost]['assess_linear'].out_assessment for fold_idx in xrange(self.folds_count)]
                     avgrmsd_tasks[cost] = average_rmsd
-
+                # --------------------------------------------------------------------------------
                 sel_lowest_rmsd = self.new_task('select_lowest_rmsd_%s_%s' % (train_size, replicate_id), SelectLowestRMSD)
                 sel_lowest_rmsd.in_values = [average_rmsd.out_rmsdavg for average_rmsd in avgrmsd_tasks.values()]
-
+                # --------------------------------------------------------------------------------
                 run_id = 'mainwfrun_liblinear_%s_tst%s_trn%s_%s' % (self.dataset_name, self.test_size, train_size, replicate_id)
                 mainwfrun = self.new_task('mainwfrun_%s_%s' % (train_size, replicate_id), MainWorkflowRunner,
                         dataset_name=self.dataset_name,
@@ -254,13 +257,18 @@ class CrossValidate(sl.WorkflowTask):
                         parallel_lin_train=False,
                         runmode=self.runmode)
                 mainwfrun.in_lowestrmsd = sel_lowest_rmsd.out_lowest
-
+                # --------------------------------------------------------------------------------
                 # Collect one lowest rmsd per train size
                 lowest_rmsds.append(sel_lowest_rmsd)
 
                 mainwfruns.append(mainwfrun)
 
-        return mainwfruns
+        # --------------------------------------------------------------------------------
+        mergedreport = self.new_task('merged_report_%s_%s' % (self.dataset_name, self.run_id), MergedDataReport,
+                run_id = self.run_id)
+        mergedreport.in_reports = [t.out_report for t in mainwfruns]
+
+        return mergedreport
 
 # ================================================================================
 
@@ -277,11 +285,17 @@ class MainWorkflowRunner(sl.Task):
     slurm_project = luigi.Parameter()
     parallel_lin_train = luigi.BooleanParameter()
     runmode = luigi.Parameter()
+
     # In-ports
     in_lowestrmsd = None
+
     # Out-ports
     def out_done(self):
         return sl.TargetInfo(self, self.in_lowestrmsd().path + '.mainwf_done')
+    def out_report(self):
+        outf_path = 'data/' + self.run_id + '/testrun_dataset_liblinear_datareport.csv'
+        return sl.TargetInfo(self, outf_path) # We manually re-create the filename that this should have
+
     # Task action
     def run(self):
         with self.in_lowestrmsd().open() as infile:
@@ -305,4 +319,36 @@ class MainWorkflowRunner(sl.Task):
 # ================================================================================
 
 if __name__ == '__main__':
-    sl.run(cmdline_args=['--scheduler-host=localhost', '--workers=2'], main_task_cls=CrossValidate)
+    sl.run(cmdline_args=['--scheduler-host=localhost', '--workers=1'], main_task_cls=CrossValidate)
+
+    merged_report_filepath = 'data/test_run_001_merged_report.csv'
+    rowdicts = []
+    with open(merged_report_filepath) as infile:
+        csvrd = csv.reader(infile, delimiter=',')
+        for rid, row in enumerate(csvrd):
+            if rid == 0:
+                headerrow = row
+            else:
+                rowdict = {headerrow[i]:v for i, v in enumerate(row)}
+                rowdicts.append(rowdict)
+
+    repl_ids = ['r1','r2','r3']
+    repl_markers = {'r1':'o', 'r2':'*', 'r3':'+'}
+    repl_linestyles = {'r1':'--', 'r2':':', 'r3':'-.'}
+    colors = {'r1':'r', 'r2':'b', 'r3':'g'}
+
+    train_sizes = {}
+    train_times = {}
+    for repl_id in repl_ids:
+        train_sizes[repl_id] = [r['train_size'] if r['replicate_id'] == repl_id else None for r  in rowdicts]
+        train_times[repl_id] = [r['train_time_sec'] if r['replicate_id'] == repl_id else None for r in rowdicts]
+
+    # Plot stuff
+    figure()
+    for repl_id in repl_ids:
+        plot(train_sizes[repl_id],
+             train_times[repl_id],
+             marker=repl_markers[repl_id],
+             linestyle=repl_linestyles[repl_id],
+             color=colors[repl_id])
+    show()

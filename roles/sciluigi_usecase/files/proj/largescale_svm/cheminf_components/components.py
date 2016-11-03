@@ -1864,3 +1864,25 @@ class PlotCSV(sl.Task):
         # Remove the temporary R script
         self.ex_local(['rm',
                        tempscriptpath])
+
+# ================================================================================
+
+class MergedDataReport(sl.Task):
+    run_id = luigi.Parameter()
+
+    in_reports = None
+
+    def out_merged_report(self):
+        return sl.TargetInfo(self, 'data/' + self.run_id + '_merged_report.csv')
+
+    def run(self):
+        merged_rows = []
+        for i, inreportfile_targetinfo in enumerate(self.in_reports):
+            infile = inreportfile_targetinfo().open()
+            for j, line in enumerate(infile):
+                if i == 0 and j == 0:
+                    merged_rows.append(line) # Append header
+                if j > 0:
+                    merged_rows.append(line)
+        with self.out_merged_report().open('w') as outfile:
+            outfile.write(''.join(merged_rows))
