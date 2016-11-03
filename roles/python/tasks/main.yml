@@ -1,5 +1,5 @@
 ---
-- name: Install needed apt packages for pyenv
+- name: Install python packages via aptitude
   sudo: true
   apt:
     name={{ item }}
@@ -12,45 +12,9 @@
     - libssl-dev
     - python-pip
     - python-matplotlib
-- name: Install pyenv
-  git:
-    repo=https://github.com/yyuu/pyenv.git
-    dest={{ home }}/.pyenv
-- name: Set pyenv settings in ~/.bashrc_mods
-  lineinfile:
-    line='{{ item }}'
-    insertafter=EOF
-    dest={{ home }}/.bashrc_mods
-  with_items:
-    - "export PYENV_ROOT=$HOME/.pyenv"
-    - "export PYENV_SHELL=bash"
-    - "export PATH=$PYENV_ROOT/bin:$PATH"
-    - "eval \"$(pyenv init -)\""
-- name: Install Python {{ python_version }}
-  shell:
-    pyenv install {{ python_version }}
-    creates={{ home }}/.pyenv/versions/{{ python_version }}
-  environment:
-    PYENV_ROOT: "{{ home }}/.pyenv"
-    PYENV_SHELL: "bash"
-    PATH: "{{ home }}/.pyenv/bin:$PATH:/usr/bin:/bin:$PATH"
-- name: Set python {{ python_version }} as global version
-  shell:
-    pyenv global {{ python_version }}
-    creates={{ home }}/.pyenv/version
-  environment:
-    PYENV_ROOT: "{{ home }}/.pyenv"
-    PYENV_SHELL: "bash"
-    PATH: "{{ home }}/.pyenv/bin:$PATH:/usr/bin:/bin:$PATH"
-- name: Install some useful python packages via pip
+- name: Install some python packages via pip (which aren't available via aptitude)
   pip:
     name={{ item }}
   with_items:
-    - nose
-    - tdaemon
     - jupyter
     - matplotlib
-  environment:
-    PYENV_ROOT: "{{ home }}/.pyenv"
-    PYENV_SHELL: "bash"
-    PATH: "{{ home }}/.pyenv/shims:{{ home }}/.pyenv/bin:$PATH:/usr/bin:/bin:$PATH"
