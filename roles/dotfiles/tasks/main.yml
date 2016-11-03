@@ -1,6 +1,6 @@
 ---
-- name: Symlink config files in rc folder
-  file: src=/vagrant/roles/dotfiles/files/{{ item }} dest={{ home }}/{{ item }} state=link
+- name: Copy config files in rc folder
+  copy: src=files/{{ item }} dest={{ home }}/{{ item }}
   with_items:
     - .bashrc_mods
     - .bash_aliases
