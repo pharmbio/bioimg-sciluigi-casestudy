@@ -1,44 +1,15 @@
-# coding: utf-8
-
-# ## How to run
-#
-# - To run the workflow, click: "Cell > Run All" in the menu above!
-#   - Note that running the full workflow takes a long time. On a Intel i5 dual core laptop, it could take up to ~45 minutes to finish.
-# - For a visualization of the progress, see the "Luigi Task Visualizer" browser tab.
-#   - If it is not open, you can also access it via [this link](http://localhost:8082/static/visualiser/index.html#)
-# - To see the dependency graph for the CrossValidate workflow in the Luigi Task Visualizer interface:
-#   - Click the "CrossValidateWorkflow" task in the left menu
-#   - Then click the little blue dependency graph icon in the "Actions" column, to the far right on the page.
-#   - **Note:** You might need to refresh the browser (Ctrl + R, or Cmd + R), to see the latest state of the workflow.
-#
-# ### Caveats
-#
-# - Please note that in order to re-run the workflow full, you need to go "Kernel > Restart", or "Kernel > Restart & Clear all output".
-#   - This is because of how Luigi works, by defining tasks as classes, and that if reloading a cell in Jupyter, that would mean re-declaring an already declared class.
-#   - Alternatively, one can just re-start any cells containing only execution code (no class definitions).
-#
-#
-# ## Set up imports and logging
-
-# In[ ]:
-
 from cheminf_components import *
+from matplotlib.pyplot import *
+import csv
 import logging
 import luigi
-import sciluigi
+import os
+import sciluigi as sl
 import time
 
 log = logging.getLogger('sciluigi-interface')
-log.setLevel(logging.WARN) # So as not to flood the Jupyter cells with output for the large number of tasks
 
-
-# ## Define the workflow
-#
-# The workflow definition is defined in a subclass of `sciluigi.WorkflowTask`, in the `workflow()` special function, which returns the most downstream task in the workflow.
-
-# In[ ]:
-
-class CrossValidateWorkflow(sciluigi.WorkflowTask):
+class CrossValidate(sl.WorkflowTask):
     '''
     Find the optimal SVM cost values via a grid-search, with cross-validation
     '''
@@ -46,25 +17,25 @@ class CrossValidateWorkflow(sciluigi.WorkflowTask):
     # PARAMETERS
     dataset_name = luigi.Parameter(default='testrun_dataset')
     run_id = luigi.Parameter('test_run_001')
-    replicate_id = luigi.Parameter('')
+    replicate_id = luigi.Parameter(default=None)
     replicate_ids = luigi.Parameter(default='r1,r2,r3')
     folds_count = luigi.IntParameter(default=10)
-    min_height = luigi.Parameter(default='1')
-    max_height = luigi.Parameter(default='3')
-    test_size = luigi.Parameter('1000')
-    train_sizes = luigi.Parameter(default='500,1000,2000,4000,8000')
+    min_height = luigi.Parameter(default=1)
+    max_height = luigi.Parameter(default=3)
+    test_size = luigi.Parameter(1000)
+    train_sizes = luigi.Parameter(default='50,100,500,1000,5000')
     lin_type = luigi.Parameter(default='12') # 12, See: https://www.csie.ntu.edu.tw/~cjlin/liblinear/FAQ.html
-    randomdatasize_mb = luigi.IntParameter(default='10')
+    randomdatasize_mb = luigi.IntParameter(default=10)
     runmode = 'local'
     slurm_project = 'N/A'
 
     def workflow(self):
         if self.runmode == 'local':
-            runmode = sciluigi.RUNMODE_LOCAL
+            runmode = sl.RUNMODE_LOCAL
         elif self.runmode == 'hpc':
-            runmode = sciluigi.RUNMODE_HPC
+            runmode = sl.RUNMODE_HPC
         elif self.runmode == 'mpi':
-            runmode = sciluigi.RUNMODE_MPI
+            runmode = sl.RUNMODE_MPI
         else:
             raise Exception('Runmode is none of local, hpc, nor mpi. Please fix and try again!')
 
@@ -75,7 +46,7 @@ class CrossValidateWorkflow(sciluigi.WorkflowTask):
         tasks = {}
         lowest_rmsds = []
         mainwfruns = []
-        if self.replicate_id != '':
+        if self.replicate_id is not None:
             replicate_ids = [self.replicate_id]
         else:
             replicate_ids = [i for i in self.replicate_ids.split(',')]
@@ -85,7 +56,7 @@ class CrossValidateWorkflow(sciluigi.WorkflowTask):
                     replicate_id=replicate_id,
                     min_height = self.min_height,
                     max_height = self.max_height,
-                    slurminfo = sciluigi.SlurmInfo(
+                    slurminfo = sl.SlurmInfo(
                         runmode=runmode,
                         project=self.slurm_project,
                         partition='core',
@@ -111,7 +82,7 @@ class CrossValidateWorkflow(sciluigi.WorkflowTask):
                         sampling_method='random',
                         test_size=self.test_size,
                         train_size=train_size,
-                        slurminfo = sciluigi.SlurmInfo(
+                        slurminfo = sl.SlurmInfo(
                             runmode=runmode,
                             project='b2013262',
                             partition='core',
@@ -124,7 +95,7 @@ class CrossValidateWorkflow(sciluigi.WorkflowTask):
                 # ----------------------------------------------------------------
                 sprstrain = self.new_task('sparsetrain_%s_%s' % (train_size, replicate_id), CreateSparseTrainDataset,
                         replicate_id=replicate_id,
-                        slurminfo = sciluigi.SlurmInfo(
+                        slurminfo = sl.SlurmInfo(
                             runmode=runmode,
                             project=self.slurm_project,
                             partition='core',
@@ -136,7 +107,7 @@ class CrossValidateWorkflow(sciluigi.WorkflowTask):
                 sprstrain.in_traindata = samplett.out_traindata
                 # ----------------------------------------------------------------
                 gunzip = self.new_task('gunzip_sparsetrain_%s_%s' % (train_size, replicate_id), UnGzipFile,
-                        slurminfo = sciluigi.SlurmInfo(
+                        slurminfo = sl.SlurmInfo(
                             runmode=runmode,
                             project=self.slurm_project,
                             partition='core',
@@ -148,7 +119,7 @@ class CrossValidateWorkflow(sciluigi.WorkflowTask):
                 gunzip.in_gzipped = sprstrain.out_sparse_traindata
                 # ----------------------------------------------------------------
                 cntlines = self.new_task('countlines_%s_%s' % (train_size, replicate_id), CountLines,
-                        slurminfo = sciluigi.SlurmInfo(
+                        slurminfo = sl.SlurmInfo(
                             runmode=runmode,
                             project=self.slurm_project,
                             partition='core',
@@ -162,7 +133,7 @@ class CrossValidateWorkflow(sciluigi.WorkflowTask):
                 genrandomdata= self.new_task('genrandomdata_%s_%s' % (train_size, replicate_id), CreateRandomData,
                         size_mb=self.randomdatasize_mb,
                         replicate_id=replicate_id,
-                        slurminfo = sciluigi.SlurmInfo(
+                        slurminfo = sl.SlurmInfo(
                             runmode=runmode,
                             project=self.slurm_project,
                             partition='core',
@@ -174,7 +145,7 @@ class CrossValidateWorkflow(sciluigi.WorkflowTask):
                 genrandomdata.in_basepath = gunzip.out_ungzipped
                 # ----------------------------------------------------------------
                 shufflelines = self.new_task('shufflelines_%s_%s' % (train_size, replicate_id), ShuffleLines,
-                        slurminfo = sciluigi.SlurmInfo(
+                        slurminfo = sl.SlurmInfo(
                             runmode=runmode,
                             project=self.slurm_project,
                             partition='core',
@@ -196,7 +167,7 @@ class CrossValidateWorkflow(sciluigi.WorkflowTask):
                             fold_index = fold_idx,
                             folds_count = self.folds_count,
                             seed = 0.637,
-                            slurminfo = sciluigi.SlurmInfo(
+                            slurminfo = sl.SlurmInfo(
                                 runmode=runmode,
                                 project=self.slurm_project,
                                 partition='core',
@@ -214,7 +185,7 @@ class CrossValidateWorkflow(sciluigi.WorkflowTask):
                                 replicate_id = replicate_id,
                                 lin_type = self.lin_type,
                                 lin_cost = cost,
-                                slurminfo = sciluigi.SlurmInfo(
+                                slurminfo = sl.SlurmInfo(
                                     runmode=runmode,
                                     project=self.slurm_project,
                                     partition='core',
@@ -227,7 +198,7 @@ class CrossValidateWorkflow(sciluigi.WorkflowTask):
                         # -------------------------------------------------
                         pred_lin = self.new_task('predlin_fold_%d_cost_%s_%s_%s' % (fold_idx, cost, train_size, replicate_id), PredictLinearModel,
                                 replicate_id = replicate_id,
-                                slurminfo = sciluigi.SlurmInfo(
+                                slurminfo = sl.SlurmInfo(
                                     runmode=runmode,
                                     project=self.slurm_project,
                                     partition='core',
@@ -241,7 +212,7 @@ class CrossValidateWorkflow(sciluigi.WorkflowTask):
                         # -------------------------------------------------
                         assess_lin = self.new_task('assesslin_fold_%d_cost_%s_%s_%s' % (fold_idx, cost, train_size, replicate_id), AssessLinearRMSD,
                                 lin_cost = cost,
-                                slurminfo = sciluigi.SlurmInfo(
+                                slurminfo = sl.SlurmInfo(
                                     runmode=runmode,
                                     project=self.slurm_project,
                                     partition='core',
@@ -301,7 +272,7 @@ class CrossValidateWorkflow(sciluigi.WorkflowTask):
 
 # ================================================================================
 
-class MainWorkflowRunner(sciluigi.Task):
+class MainWorkflowRunner(sl.Task):
     # Parameters
     dataset_name = luigi.Parameter()
     run_id = luigi.Parameter()
@@ -312,23 +283,23 @@ class MainWorkflowRunner(sciluigi.Task):
     test_size = luigi.Parameter()
     lin_type = luigi.Parameter()
     slurm_project = luigi.Parameter()
-    parallel_lin_train = luigi.BoolParameter()
+    parallel_lin_train = luigi.BooleanParameter()
     runmode = luigi.Parameter()
 
-    # In-ports (defined as fields accepting sciluigi.TargetInfo objects)
+    # In-ports
     in_lowestrmsd = None
 
     # Out-ports
     def out_done(self):
-        return sciluigi.TargetInfo(self, self.in_lowestrmsd().path + '.mainwf_done')
+        return sl.TargetInfo(self, self.in_lowestrmsd().path + '.mainwf_done')
     def out_report(self):
         outf_path = 'data/' + self.run_id + '/testrun_dataset_liblinear_datareport.csv'
-        return sciluigi.TargetInfo(self, outf_path) # We manually re-create the filename that this should have
+        return sl.TargetInfo(self, outf_path) # We manually re-create the filename that this should have
 
-    # Task implementation
+    # Task action
     def run(self):
         with self.in_lowestrmsd().open() as infile:
-            records = sciluigi.recordfile_to_dict(infile)
+            records = sl.recordfile_to_dict(infile)
             lowest_cost = records['lowest_cost']
         self.ex('python wfmm.py' +
                 ' --dataset-name=%s' % self.dataset_name +
@@ -345,73 +316,39 @@ class MainWorkflowRunner(sciluigi.Task):
         with self.out_done().open('w') as donefile:
             donefile.write('Done!\n')
 
+# ================================================================================
 
-# ## Execute the workflow
-#
-# Execute the workflow locally (using the luigi daemon which runs in the background), starting with the `CrossValidateWorkflow` workflow class.
+if __name__ == '__main__':
+    sl.run(cmdline_args=['--scheduler-host=localhost', '--workers=1'], main_task_cls=CrossValidate)
 
-# In[ ]:
+    merged_report_filepath = 'data/test_run_001_merged_report.csv'
+    rowdicts = []
+    with open(merged_report_filepath) as infile:
+        csvrd = csv.reader(infile, delimiter=',')
+        for rid, row in enumerate(csvrd):
+            if rid == 0:
+                headerrow = row
+            else:
+                rowdict = {headerrow[i]:v for i, v in enumerate(row)}
+                rowdicts.append(rowdict)
 
-print time.strftime('%Y-%m-%d %H:%M:%S: ') + 'Workflow started.'
-sciluigi.run(cmdline_args=['--scheduler-host=localhost', '--workers=4'], main_task_cls=CrossValidateWorkflow)
-print time.strftime('%Y-%m-%d %H:%M:%S: ') + 'Workflow finished!'
+    repl_ids = ['r1','r2','r3']
+    repl_markers = {'r1':'o', 'r2':'*', 'r3':'+'}
+    repl_linestyles = {'r1':'--', 'r2':':', 'r3':'-.'}
+    colors = {'r1':'r', 'r2':'b', 'r3':'g'}
 
+    train_sizes = {}
+    train_times = {}
+    for repl_id in repl_ids:
+        train_sizes[repl_id] = [r['train_size'] if r['replicate_id'] == repl_id else None for r  in rowdicts]
+        train_times[repl_id] = [r['train_time_sec'] if r['replicate_id'] == repl_id else None for r in rowdicts]
 
-# ## Plot training times and RMSD against training set data sizes
-
-# In[ ]:
-
-import csv
-from matplotlib.pyplot import *
-
-merged_report_filepath = 'data/test_run_001_merged_report.csv'
-rowdicts = []
-with open(merged_report_filepath) as infile:
-    csvrd = csv.reader(infile, delimiter=',')
-    for rid, row in enumerate(csvrd):
-        if rid == 0:
-            headerrow = row
-        else:
-            rowdicts.append({headerrow[i]:v for i, v in enumerate(row)})
-
-replicate_ids = ['r1','r2','r3']
-
-train_sizes = []
-for r  in rowdicts:
-    if r['replicate_id'] == 'r1':
-        train_sizes.append(r['train_size'])
-print 'Training sizes:  ' + ', '.join(train_sizes) + ' molecules'
-
-train_times = {}
-for repl_id in replicate_ids:
-    train_times[repl_id] = []
-    for r in rowdicts:
-        if r['replicate_id'] == 'r1':
-            train_times[repl_id].append(r['train_time_sec'])
-print 'Training times: '
-for rid in range(1,4):
-    print '   Replicate %d: ' % rid + ', '.join(train_times['r%d' % rid]) + ' seconds'
-
-
-# Calculate average values for the training time, based on the three replicates r1, r2, r3
-train_times_avg = []
-for i, s1 in enumerate(train_times['r1']):
-    train_times_avg.append(float(s1) + float(train_times['r2'][i]) + float(train_times['r3'][i]) / float(3))
-
-# Initialize plotting figure
-fig = figure()
-subpl1 = fig.add_subplot(1,1,1)
-subpl1.set_xscale('log')
-subpl1.set_yscale('log')
-subpl1.set_xlim([500,8000])
-subpl1.set_ylim([0.01,10])
-
-# Do the plotting
-for repl_id in replicate_ids:
-    subpl1.plot(train_sizes,
-         train_times_avg,
-         marker='o',
-         color='r',
-         linestyle='--')
-show() # Display the plot
-
+    # Plot stuff
+    figure()
+    for repl_id in repl_ids:
+        plot(train_sizes[repl_id],
+             train_times[repl_id],
+             marker=repl_markers[repl_id],
+             linestyle=repl_linestyles[repl_id],
+             color=colors[repl_id])
+    show()
