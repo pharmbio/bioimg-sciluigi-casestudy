@@ -363,6 +363,8 @@ print time.strftime('%Y-%m-%d %H:%M:%S: ') + 'Workflow finished!'
 
 
 # ## Parse result data from workflow into python dicts
+#
+# This step does not produce any output, but is done as a preparation for the subsequent printing of values, and plotting.
 
 # In[ ]:
 
@@ -388,18 +390,20 @@ train_sizes = []
 for r  in rowdicts:
     if r['replicate_id'] == 'r1':
         train_sizes.append(r['train_size'])
-print 'Train sizes:        ' + ', '.join(train_sizes) + ' molecules'
 
-# Collect the training times (in seconds)
+# Collect the training times, RMSD- and (LIBLINEAR) Cost values
 train_times = {}
 rmsd_values = {}
+cost_values = {}
 for repl_id in replicate_ids:
     train_times[repl_id] = []
     rmsd_values[repl_id] = []
+    cost_values[repl_id] = []
     for r in rowdicts:
         if r['replicate_id'] == repl_id:
             train_times[repl_id].append(r['train_time_sec'])
             rmsd_values[repl_id].append(r['rmsd'])
+            cost_values[repl_id].append(r['lin_cost'])
 
 # Calculate average values for the training time
 train_times_avg = []
@@ -423,18 +427,22 @@ for i in range(0, len(rmsd_values['r1'])):
 # In[ ]:
 
 print "-"*60
+print 'Train sizes:        ' + ', '.join(train_sizes) + ' molecules'
+print ''
+print 'RMSD values: '
+for rid in range(1,4):
+    print '      Replicate %d: ' % rid + ', '.join(['%.2f' % float(v) for v in rmsd_values['r%d' % rid]])
 print ''
 print 'Train times: '
 for rid in range(1,4):
     print '      Replicate %d: ' % rid + ', '.join(train_times['r%d' % rid]) + ' seconds'
 print ''
-print 'RMSD values: '
+print 'Cost values: '
 for rid in range(1,4):
-    print '      Replicate %d: ' % rid + ', '.join(['%.2f' % float(v) for v in rmsd_values['r%d' % rid]])
-
+    print '      Replicate %d: ' % rid + ', '.join(cost_values['r%d' % rid])
 print ''
-print 'Train times (avg): ' + ', '.join(['%.2f' % x for x in train_times_avg])
 print 'RMSD values (avg): ' + ', '.join(['%.2f' % x for x in rmsd_values_avg])
+print 'Train times (avg): ' + ', '.join(['%.2f' % x for x in train_times_avg]) + ' seconds'
 print "-"*60
 
 
@@ -445,30 +453,45 @@ print "-"*60
 # Initialize plotting figure
 fig = figure()
 
-# Plot training times
+# Set up subplot for RMSD values
 subpl1 = fig.add_subplot(1,1,1)
+# x-axis
+xticks = [500,1000,2000,4000,8000]
 subpl1.set_xscale('log')
-subpl1.set_yscale('log')
 subpl1.set_xlim([500,8000])
-subpl1.set_ylim([0.01,10])
+subpl1.set_xticks(ticks=xticks)
+subpl1.set_xticklabels([str(l) for l in xticks])
+subpl1.set_xlabel('Training set size (number of molecules)')
+# y-axis
+subpl1.set_ylim([0,1])
+subpl1.set_ylabel('RMSD for test prediction')
+# plot
 subpl1.plot(train_sizes,
-     train_times_avg,
-     label='Training time (s)',
-     marker='o',
-     color='r',
-     linestyle='--')
-
-subpl2 = subpl1.twinx()
-subpl2.set_xscale('log')
-subpl2.set_yscale('log')
-subpl2.set_xlim([500,8000])
-subpl2.set_ylim([0.5,1])
-subpl2.plot(train_sizes,
      rmsd_values_avg,
      label='RMSD for test prediction',
-     marker='*',
+     marker='.',
      color='k',
-     linestyle='-.')
+     linestyle='-')
+
+# Set up subplot for training times
+subpl2 = subpl1.twinx()
+# y-axis
+yticks = [0.01,0.02,0.03,0.05,0.1,0.2,0.3,0.4,0.5]
+subpl2.set_ylim([0.01,0.5])
+subpl2.set_yscale('log')
+subpl2.set_yticks(ticks=yticks)
+subpl2.set_yticklabels([str(int(l*1000)) for l in yticks])
+subpl2.set_ylabel('Training time (milliseconds)')
+subpl2.tick_params(axis='y', colors='r')
+subpl2.yaxis.label.set_color('r')
+subpl2.spines['right'].set_color('red')
+# plot
+subpl2.plot(train_sizes,
+     train_times_avg,
+     label='Training time (seconds)',
+     marker='.',
+     color='r',
+     linestyle='-')
 
 subpl1.legend(loc='upper left', fontsize=9)
 subpl2.legend(bbox_to_anchor=(0, 0.9), loc='upper left', fontsize=9)
