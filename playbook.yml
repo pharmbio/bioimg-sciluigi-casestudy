@@ -40,7 +40,7 @@
       - { role: desktop, sudo: false }
       - { role: dotfiles, sudo: false }
       - { role: python, sudo: false }
-      - { role: jedi-vim, sudo: false }
+      #- { role: jedi-vim, sudo: false }
       - { role: luigi, sudo: false }
       - { role: java, sudo: false }
       - { role: sciluigi_usecase, sudo: false }

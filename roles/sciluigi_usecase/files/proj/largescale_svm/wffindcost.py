@@ -1,5 +1,10 @@
+
 # coding: utf-8
 
+# # Reproduce SciLuigi Case Study Workflow
+#
+# The code for this virtual machine is available [here](https://github.com/pharmbio/bioimg-sciluigi-casestudy), and the direct link to the code for this notebook is available [here](https://github.com/pharmbio/bioimg-sciluigi-casestudy/blob/master/roles/sciluigi_usecase/files/proj/largescale_svm/wffindcost.ipynb).
+#
 # ## How to run
 #
 # - To run the workflow, click: "Cell > Run All" in the menu above!
@@ -352,7 +357,7 @@ class MainWorkflowRunner(sciluigi.Task):
 
 # In[ ]:
 
-print time.strftime('%Y-%m-%d %H:%M:%S: ') + 'Workflow started.'
+print time.strftime('%Y-%m-%d %H:%M:%S: ') + 'Workflow started ...'
 sciluigi.run(cmdline_args=['--scheduler-host=localhost', '--workers=4'], main_task_cls=CrossValidateWorkflow)
 print time.strftime('%Y-%m-%d %H:%M:%S: ') + 'Workflow finished!'
 
@@ -365,7 +370,11 @@ import csv
 from matplotlib.pyplot import *
 
 merged_report_filepath = 'data/test_run_001_merged_report.csv'
+replicate_ids = ['r1','r2','r3']
 rowdicts = []
+
+
+# Collect data in one dict per row in the csv file
 with open(merged_report_filepath) as infile:
     csvrd = csv.reader(infile, delimiter=',')
     for rid, row in enumerate(csvrd):
@@ -374,44 +383,77 @@ with open(merged_report_filepath) as infile:
         else:
             rowdicts.append({headerrow[i]:v for i, v in enumerate(row)})
 
-replicate_ids = ['r1','r2','r3']
-
+# Collect the training sizes
 train_sizes = []
 for r  in rowdicts:
     if r['replicate_id'] == 'r1':
         train_sizes.append(r['train_size'])
 print 'Training sizes:  ' + ', '.join(train_sizes) + ' molecules'
 
+# Collect the training times (in seconds)
 train_times = {}
+rmsd_values = {}
 for repl_id in replicate_ids:
     train_times[repl_id] = []
+    rmsd_values[repl_id] = []
     for r in rowdicts:
-        if r['replicate_id'] == 'r1':
+        if r['replicate_id'] == repl_id:
             train_times[repl_id].append(r['train_time_sec'])
+            rmsd_values[repl_id].append(r['rmsd'])
+
+# Print training time and RMSD values
 print 'Training times: '
 for rid in range(1,4):
     print '   Replicate %d: ' % rid + ', '.join(train_times['r%d' % rid]) + ' seconds'
+print 'RMSD values: '
+for rid in range(1,4):
+    print '   Replicate %d: ' % rid + ', '.join(['%.2f' % float(v) for v in rmsd_values['r%d' % rid]])
 
-
-# Calculate average values for the training time, based on the three replicates r1, r2, r3
+# Calculate average values for the training time
 train_times_avg = []
-for i, s1 in enumerate(train_times['r1']):
-    train_times_avg.append(float(s1) + float(train_times['r2'][i]) + float(train_times['r3'][i]) / float(3))
+for i in range(0, len(train_times['r1'])):
+    train_times_avg.append(0.0)
+    for repl_id in replicate_ids:
+        train_times_avg[i] += float(train_times[repl_id][i])
+    train_times_avg[i] =  train_times_avg[i] / float(len(replicate_ids))
+
+# Calculate average values for the RMSD values
+rmsd_values_avg = []
+for i in range(0, len(rmsd_values['r1'])):
+    rmsd_values_avg.append(0.0)
+    for repl_id in replicate_ids:
+        rmsd_values_avg[i] += float(rmsd_values[repl_id][i])
+    rmsd_values_avg[i] =  rmsd_values_avg[i] / float(len(replicate_ids))
+
+print 'Average training times: ' + ', '.join(['%.2f' % x for x in train_times_avg])
+print '   Average RMSD values: ' + ', '.join(['%.2f' % x for x in rmsd_values_avg])
+
 
 # Initialize plotting figure
 fig = figure()
+
+# Plot training times
 subpl1 = fig.add_subplot(1,1,1)
 subpl1.set_xscale('log')
 subpl1.set_yscale('log')
 subpl1.set_xlim([500,8000])
 subpl1.set_ylim([0.01,10])
+subpl1.plot(train_sizes,
+     train_times_avg,
+     marker='o',
+     color='r',
+     linestyle='--')
 
-# Do the plotting
-for repl_id in replicate_ids:
-    subpl1.plot(train_sizes,
-         train_times_avg,
-         marker='o',
-         color='r',
-         linestyle='--')
+subpl2 = subpl1.twinx()
+subpl2.set_xscale('log')
+subpl2.set_yscale('log')
+subpl2.set_xlim([500,8000])
+subpl2.set_ylim([0.5,1])
+subpl2.plot(train_sizes,
+     rmsd_values_avg,
+     marker='*',
+     color='k',
+     linestyle='-.')
+
 show() # Display the plot
 
