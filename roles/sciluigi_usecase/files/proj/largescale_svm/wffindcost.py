@@ -362,7 +362,7 @@ sciluigi.run(cmdline_args=['--scheduler-host=localhost', '--workers=4'], main_ta
 print time.strftime('%Y-%m-%d %H:%M:%S: ') + 'Workflow finished!'
 
 
-# ## Plot training times and RMSD against training set data sizes
+# ## Parse result data from workflow into python dicts
 
 # In[ ]:
 
@@ -388,7 +388,7 @@ train_sizes = []
 for r  in rowdicts:
     if r['replicate_id'] == 'r1':
         train_sizes.append(r['train_size'])
-print 'Training sizes:  ' + ', '.join(train_sizes) + ' molecules'
+print 'Train sizes:        ' + ', '.join(train_sizes) + ' molecules'
 
 # Collect the training times (in seconds)
 train_times = {}
@@ -400,14 +400,6 @@ for repl_id in replicate_ids:
         if r['replicate_id'] == repl_id:
             train_times[repl_id].append(r['train_time_sec'])
             rmsd_values[repl_id].append(r['rmsd'])
-
-# Print training time and RMSD values
-print 'Training times: '
-for rid in range(1,4):
-    print '   Replicate %d: ' % rid + ', '.join(train_times['r%d' % rid]) + ' seconds'
-print 'RMSD values: '
-for rid in range(1,4):
-    print '   Replicate %d: ' % rid + ', '.join(['%.2f' % float(v) for v in rmsd_values['r%d' % rid]])
 
 # Calculate average values for the training time
 train_times_avg = []
@@ -425,9 +417,30 @@ for i in range(0, len(rmsd_values['r1'])):
         rmsd_values_avg[i] += float(rmsd_values[repl_id][i])
     rmsd_values_avg[i] =  rmsd_values_avg[i] / float(len(replicate_ids))
 
-print 'Average training times: ' + ', '.join(['%.2f' % x for x in train_times_avg])
-print '   Average RMSD values: ' + ', '.join(['%.2f' % x for x in rmsd_values_avg])
 
+# ## Print values (Train sizes, train times and RMSD)
+
+# In[ ]:
+
+print "-"*60
+print ''
+print 'Train times: '
+for rid in range(1,4):
+    print '      Replicate %d: ' % rid + ', '.join(train_times['r%d' % rid]) + ' seconds'
+print ''
+print 'RMSD values: '
+for rid in range(1,4):
+    print '      Replicate %d: ' % rid + ', '.join(['%.2f' % float(v) for v in rmsd_values['r%d' % rid]])
+
+print ''
+print 'Train times (avg): ' + ', '.join(['%.2f' % x for x in train_times_avg])
+print 'RMSD values (avg): ' + ', '.join(['%.2f' % x for x in rmsd_values_avg])
+print "-"*60
+
+
+# ## Plot train time and RMSD against training size
+
+# In[ ]:
 
 # Initialize plotting figure
 fig = figure()
@@ -440,6 +453,7 @@ subpl1.set_xlim([500,8000])
 subpl1.set_ylim([0.01,10])
 subpl1.plot(train_sizes,
      train_times_avg,
+     label='Training time (s)',
      marker='o',
      color='r',
      linestyle='--')
@@ -451,9 +465,13 @@ subpl2.set_xlim([500,8000])
 subpl2.set_ylim([0.5,1])
 subpl2.plot(train_sizes,
      rmsd_values_avg,
+     label='RMSD for test prediction',
      marker='*',
      color='k',
      linestyle='-.')
+
+subpl1.legend(loc='upper left', fontsize=9)
+subpl2.legend(bbox_to_anchor=(0, 0.9), loc='upper left', fontsize=9)
 
 show() # Display the plot
 
