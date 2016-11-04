@@ -10,8 +10,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |conf|
   # --------------------------------------------------------------------
   conf.vm.define "bioimg", autostart: true do |bimg|
     bimg.vm.provider "virtualbox" do |vbox|
-      vbox.memory = 4096
-      vbox.cpus = 4
+      vbox.memory = 2048
+      vbox.cpus = 2
       vbox.gui = true
     end
     bimg.vm.box = "ubuntu/xenial64"
