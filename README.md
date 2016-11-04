@@ -35,7 +35,7 @@ Usage:
 
 1. Import the .ova image into a Virtual Machine software such as Virtual box. 
 2. Start the virtual machine. 
-3. Log in with `ubuntu` and `changethis...` (including the dots)
+3. Log in with "`ubuntu`" and "`changethis...`" (including the dots)
 4. **Optional but highly recommended, for security reasons:** Open a terminal and execute the `passwd` command, to immediately set a new password.
 5. Click the "Open Jupyter Notebook" icon on the desktop.
 6. Inside Jupyter, click: Cell > Run all cells
