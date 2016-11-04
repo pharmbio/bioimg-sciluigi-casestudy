@@ -13,7 +13,7 @@ For a view-only version of the Jupyter Notebook with the full case study workflo
 Screenshot
 ----------
 
-![Screenshot](http://i.imgur.com/SbxZxiP.png)
+![Screenshot](http://i.imgur.com/VRokaSY.png)
 
 Usage
 -----
