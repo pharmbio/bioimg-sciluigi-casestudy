@@ -47,7 +47,7 @@ Usage:
 
 - [Vagrant](https://www.vagrantup.com/)
 - [Ansible](http://www.ansible.com/)
-- [VirtualBox](https://www.virtualbox.org/) (Not required if you use Docker as provider!)
+- [VirtualBox](https://www.virtualbox.org/)
 
 #### Installing the requirements in Ubuntu (tested with 14.04)
 
