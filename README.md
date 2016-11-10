@@ -43,7 +43,53 @@ Usage:
 
 ### Building the virtual machine from scratch
 
-- (TBC)
+#### Prerequisites
+
+- [Vagrant](https://www.vagrantup.com/)
+- [Ansible](http://www.ansible.com/)
+- [VirtualBox](https://www.virtualbox.org/) (Not required if you use Docker as provider!)
+
+#### Installing the requirements in Ubuntu (tested with 14.04)
+
+1. Install Virtualbox:
+   ```bash
+   sudo apt-get install virtualbox
+   ```
+
+2. Install a recent version of ansible:
+   ```bash
+   sudo apt-get install ansible/trusty-backports
+   ```
+
+   *(if you ubuntu version is "trusty", otherwise, replace it with your appropriate version)*
+
+3. Install Vagrant, by first downloadng the proper .deb file from [vagrantup.com](https://www.vagrantup.com/downloads.html)
+
+4. ... and then installing it with:
+   ```bash
+   sudo dpkg -i <deb-file>
+   ```
+
+#### Setup and Usage
+
+##### Clone the github repository:
+
+```bash
+git clone https://github.com/pharmbio/bioimg-sciluigi-casestudy.git
+cd bioimg-sciluigi-casestudy
+```
+
+##### Bring up the VM
+
+```bash
+vagrant up
+```
+
+##### Log in to the VM
+
+```bash
+vagrant ssh virtualbox
+```
 
 Known issues
 ------------
