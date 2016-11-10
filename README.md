@@ -4,6 +4,8 @@ SciLuigi CaseStudy Virtual Machine
 This repository contatins the code to set up a virtual machine with the case
 study workflow for SciLuigi, runnable from within a Jupyter Notebook. 
 
+For a pre-made image of this virtual machine, in .ova format, [see here](https://dx.doi.org/10.6084/m9.figshare.4038048.v4).
+
 It does also include the SciLuigi case study workflow, which can be found
 in [this folder](https://github.com/pharmbio/bioimg-sciluigi-casestudy/tree/master/roles/sciluigi_usecase/files/proj/largescale_svm).
 
