@@ -44,3 +44,12 @@ Usage:
 ### Building the virtual machine from scratch
 
 - (TBC)
+
+Known issues
+------------
+
+- When logging in to the virtual machine, a few popups with error messages appear, like this:
+
+![Error Messages Screenshot](https://cloud.githubusercontent.com/assets/125003/20183345/488059fc-a765-11e6-8091-191ff3ac078d.png)
+
+This does not affect the functionality though (Reported in [#1](https://github.com/pharmbio/bioimg-sciluigi-casestudy/issues/1)).
